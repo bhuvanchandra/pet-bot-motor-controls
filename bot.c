@@ -10,16 +10,13 @@
 
 #include "servo.h"
 #include "libsoc_gpio.h"
+#include "libsoc_board.h"
 
 #define JS_DEV			"/dev/input/js%d"
 
-#define MOTOR_A_IO		11
-#define MOTOR_B_IO		105
-#define MOTOR_A_DIR_IO		104
-#define MOTOR_B_DIR_IO		106
-
 servo servo_x, servo_y;
 gpio *motor_a, *motor_b, *motor_a_dir, *motor_b_dir;
+board_config *config;
 
 int process_event(struct js_event e)
 {
@@ -102,10 +99,10 @@ void servo_init() {
 
 void motor_init(void)
 {
-	motor_a		=	libsoc_gpio_request(MOTOR_A_IO, LS_GPIO_GREEDY);
-	motor_b		=	libsoc_gpio_request(MOTOR_B_IO, LS_GPIO_GREEDY);
-	motor_a_dir	=	libsoc_gpio_request(MOTOR_A_DIR_IO, LS_GPIO_GREEDY);
-	motor_b_dir	=	libsoc_gpio_request(MOTOR_B_DIR_IO, LS_GPIO_GREEDY);
+	motor_a		=	libsoc_gpio_request(libsoc_board_gpio_id(config, "SODIMM_31"), LS_GPIO_GREEDY);
+	motor_b		=	libsoc_gpio_request(libsoc_board_gpio_id(config, "SODIMM_68"), LS_GPIO_GREEDY);
+	motor_a_dir	=	libsoc_gpio_request(libsoc_board_gpio_id(config, "SODIMM_22"), LS_GPIO_GREEDY);
+	motor_b_dir	=	libsoc_gpio_request(libsoc_board_gpio_id(config, "SODIMM_82"), LS_GPIO_GREEDY);
 
 	libsoc_gpio_set_direction(motor_a, OUTPUT);
 	libsoc_gpio_set_direction(motor_b, OUTPUT);
@@ -124,6 +121,8 @@ int main (int atgc, char **argv)
 	char js_dev[32] = {0};
 	int js_dev_instance = 0;
 	struct js_event e;
+
+        config = libsoc_board_init();
 
 	motor_init();
 	servo_init();
